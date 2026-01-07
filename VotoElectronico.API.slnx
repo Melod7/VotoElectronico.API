@@ -1,15 +1,3 @@
 <Solution>
-  <Folder Name="/Data/" />
-  <Folder Name="/Data/Context/">
-    <File Path="VotoElectronicoContext.cs" />
-  </Folder>
-  <Folder Name="/DTOs/">
-    <File Path="LoginDTO.cs" />
-  </Folder>
-  <Folder Name="/Helpers/" />
-  <Folder Name="/Models/">
-    <File Path="Usuario.cs" />
-  </Folder>
-  <Folder Name="/Services/" />
   <Project Path="VotoElectronico.API.csproj" />
 </Solution>

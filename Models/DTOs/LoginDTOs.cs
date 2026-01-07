@@ -1,9 +1,8 @@
-﻿namespace VotoElectronico.API.DTOs
+﻿namespace VotoElectronico.API.Models.DTOs
 {
     public class LoginDTO
     {
-        public string Cedula { get; set; }
+        public string Email { get; set; }
         public string Password { get; set; }
     }
 }
-
