@@ -1,4 +1,4 @@
-﻿namespace VotoElectronico.API.Models.Entities
+﻿namespace VotoElectronico.API.Models
 {
     public class Rol
     {

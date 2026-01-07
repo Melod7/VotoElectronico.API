@@ -1,4 +1,4 @@
-﻿namespace VotoElectronico.API.Models.DTOs
+﻿namespace VotoElectronico.API.DTOs
 {
     public class RegistroUsuarioDTOs
     {
