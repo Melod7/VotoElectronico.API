@@ -1,45 +1,72 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using VotoElectronico.API.Data.Context;
+using VotoElectronico.API.DTOs;
 using VotoElectronico.API.Models;
 
-namespace VotoElectronico.API.Controllers
+namespace VotoElectronico.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class VotosController : ControllerBase
+
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize(Roles = "VOTANTE")]
-    public class VotosController : ControllerBase
+    private readonly VotoElectronicoContext _context;
+
+    public VotosController(VotoElectronicoContext context)
     {
-        private readonly VotoElectronicoContext _context;
+        _context = context;
+    }
+    [HttpPost("validar-cedula")]
+    public async Task<IActionResult> ValidarCedula([FromBody] ValidarCedulaDTO dto)
+    {
+        var usuario = await _context.Usuarios
+            .FirstOrDefaultAsync(u => u.Cedula == dto.Cedula);
 
-        public VotosController(VotoElectronicoContext context)
+        if (usuario == null)
+            return NotFound("Cédula no registrada");
+
+        return Ok("Cédula válida");
+    }
+
+    [HttpPost("votar-por-codigo")]
+    public IActionResult VotarPorCodigo(VotoPorCodigoDTO dto)
+    {
+        var usuario = _context.Usuarios.FirstOrDefault(u =>
+            u.Cedula == dto.Cedula &&
+            u.CodigoVerificacion == dto.Codigo &&
+            u.CodigoExpira > DateTime.Now &&
+            !u.YaVoto
+        );
+
+        if (usuario == null)
+            return Unauthorized("Código inválido, expirado o votante no habilitado");
+
+        var eleccion = _context.Elecciones.FirstOrDefault(e =>
+            e.Id == dto.EleccionId && e.Activa);
+
+        if (eleccion == null)
+            return BadRequest("La elección no está activa");
+
+        var voto = new Voto
         {
-            _context = context;
-        }
+            UsuarioId = usuario.Id,
+            EleccionId = dto.EleccionId,
+            CandidatoId = dto.CandidatoId,
+            Fecha = DateTime.Now
+        };
 
-        [HttpPost]
-        public IActionResult Votar(int eleccionId, int candidatoId)
-        {
-            int usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        usuario.YaVoto = true;
+        usuario.CodigoVerificacion = null;
+        usuario.CodigoExpira = null;
 
-            bool yaVoto = _context.Votos.Any(v =>
-                v.EleccionId == eleccionId && v.UsuarioId == usuarioId);
+        _context.Votos.Add(voto);
+        _context.SaveChanges();
 
-            if (yaVoto)
-                return BadRequest("El usuario ya votó en esta elección.");
+        // Confirmación de sufragio
+        Console.WriteLine($" Email a {usuario.Correo}: Su voto fue registrado");
+        Console.WriteLine($"  SMS a {usuario.Telefono}: Gracias por votar");
 
-            var voto = new Voto
-            {
-                EleccionId = eleccionId,
-                CandidatoId = candidatoId,
-                UsuarioId = usuarioId
-            };
-
-            _context.Votos.Add(voto);
-            _context.SaveChanges();
-
-            return Ok("Voto registrado correctamente.");
-        }
+        return Ok("Voto registrado correctamente");
     }
 }

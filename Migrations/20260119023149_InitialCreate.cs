@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace VotoElectronico.API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialFinal : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,9 +67,14 @@ namespace VotoElectronico.API.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Cedula = table.Column<string>(type: "text", nullable: false),
                     Nombre = table.Column<string>(type: "text", nullable: false),
-                    Correo = table.Column<string>(type: "text", nullable: false),
-                    Clave = table.Column<string>(type: "text", nullable: false),
+                    Correo = table.Column<string>(type: "text", nullable: true),
+                    Telefono = table.Column<string>(type: "text", nullable: true),
+                    CodigoVerificacion = table.Column<string>(type: "text", nullable: true),
+                    CodigoExpira = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    YaVoto = table.Column<bool>(type: "boolean", nullable: false),
+                    Habilitado = table.Column<bool>(type: "boolean", nullable: false),
                     RolId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -92,7 +97,9 @@ namespace VotoElectronico.API.Migrations
                     UsuarioId = table.Column<int>(type: "integer", nullable: false),
                     EleccionId = table.Column<int>(type: "integer", nullable: false),
                     CandidatoId = table.Column<int>(type: "integer", nullable: false),
-                    Fecha = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Fecha = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CandidatoId1 = table.Column<int>(type: "integer", nullable: true),
+                    EleccionId1 = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -104,11 +111,21 @@ namespace VotoElectronico.API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_Votos_Candidatos_CandidatoId1",
+                        column: x => x.CandidatoId1,
+                        principalTable: "Candidatos",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Votos_Elecciones_EleccionId",
                         column: x => x.EleccionId,
                         principalTable: "Elecciones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Votos_Elecciones_EleccionId1",
+                        column: x => x.EleccionId1,
+                        principalTable: "Elecciones",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Votos_Usuarios_UsuarioId",
                         column: x => x.UsuarioId,
@@ -123,6 +140,12 @@ namespace VotoElectronico.API.Migrations
                 column: "EleccionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Usuarios_Cedula",
+                table: "Usuarios",
+                column: "Cedula",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Usuarios_RolId",
                 table: "Usuarios",
                 column: "RolId");
@@ -133,9 +156,19 @@ namespace VotoElectronico.API.Migrations
                 column: "CandidatoId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Votos_CandidatoId1",
+                table: "Votos",
+                column: "CandidatoId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Votos_EleccionId",
                 table: "Votos",
                 column: "EleccionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Votos_EleccionId1",
+                table: "Votos",
+                column: "EleccionId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Votos_UsuarioId",

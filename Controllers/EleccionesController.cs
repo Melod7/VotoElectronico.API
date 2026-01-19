@@ -11,6 +11,7 @@ namespace VotoElectronico.API.Controllers
     public class EleccionesController : ControllerBase
     {
         private readonly VotoElectronicoContext _context;
+        
 
         public EleccionesController(VotoElectronicoContext context)
         {

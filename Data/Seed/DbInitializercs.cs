@@ -3,37 +3,43 @@ using VotoElectronico.API.Data.Context;
 using VotoElectronico.API.Models;
 
 
-namespace VotoElectronico.API.Data.Seed
+namespace VotoElectronico.API.Data
 {
-    public static class DbInitializer
-    {
-        public static void Seed(IApplicationBuilder app)
+        public static class DbInitializercs
         {
-            using var scope = app.ApplicationServices.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<VotoElectronicoContext>();
-
-            context.Database.Migrate();
-
-            if (!context.Roles.Any())
+            public static void Seed(VotoElectronicoContext context)
             {
-                context.Roles.AddRange(
-                    new Rol { Nombre = "ADMIN" },
-                    new Rol { Nombre = "VOTANTE" }
-                );
-                context.SaveChanges();
-            }
-
-            if (!context.Usuarios.Any())
-            {
-                context.Usuarios.Add(new Usuario
+                // Roles
+                if (!context.Roles.Any())
                 {
-                    Nombre = "Administrador",
-                    Correo = "admin@voto.com",
-                    Clave = "admin123",
-                    RolId = context.Roles.First(r => r.Nombre == "ADMIN").Id
-                });
-                context.SaveChanges();
+                    context.Roles.AddRange(
+                        new Rol { Nombre = "ADMIN" },
+                        new Rol { Nombre = "VOTANTE" }
+                    );
+                    context.SaveChanges();
+                }
+
+                // Usuario votante de prueba
+                if (!context.Usuarios.Any())
+                {
+                    var rolVotante = context.Roles.First(r => r.Nombre == "VOTANTE");
+
+                    context.Usuarios.Add(new Usuario
+                    {
+                        Cedula = "0102030405",
+                        Nombre = "Votante Prueba",
+                        Correo = "votante@test.com",
+                        Telefono = "0999999999",
+                        YaVoto = false,
+                        RolId = rolVotante.Id
+                    });
+
+                    context.SaveChanges();
+                }
             }
         }
     }
-}
+
+
+
+

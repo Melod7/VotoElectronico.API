@@ -12,8 +12,8 @@ using VotoElectronico.API.Data.Context;
 namespace VotoElectronico.API.Migrations
 {
     [DbContext(typeof(VotoElectronicoContext))]
-    [Migration("20260107162658_InitialFinal")]
-    partial class InitialFinal
+    [Migration("20260119023149_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,13 +98,21 @@ namespace VotoElectronico.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Clave")
+                    b.Property<string>("Cedula")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Correo")
-                        .IsRequired()
+                    b.Property<DateTime?>("CodigoExpira")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CodigoVerificacion")
                         .HasColumnType("text");
+
+                    b.Property<string>("Correo")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Habilitado")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -113,7 +121,16 @@ namespace VotoElectronico.API.Migrations
                     b.Property<int>("RolId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Telefono")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("YaVoto")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("Cedula")
+                        .IsUnique();
 
                     b.HasIndex("RolId");
 
@@ -131,7 +148,13 @@ namespace VotoElectronico.API.Migrations
                     b.Property<int>("CandidatoId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("CandidatoId1")
+                        .HasColumnType("integer");
+
                     b.Property<int>("EleccionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("EleccionId1")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Fecha")
@@ -144,7 +167,11 @@ namespace VotoElectronico.API.Migrations
 
                     b.HasIndex("CandidatoId");
 
+                    b.HasIndex("CandidatoId1");
+
                     b.HasIndex("EleccionId");
+
+                    b.HasIndex("EleccionId1");
 
                     b.HasIndex("UsuarioId");
 
@@ -176,16 +203,24 @@ namespace VotoElectronico.API.Migrations
             modelBuilder.Entity("VotoElectronico.API.Models.Voto", b =>
                 {
                     b.HasOne("VotoElectronico.API.Models.Candidato", "Candidato")
-                        .WithMany("Votos")
+                        .WithMany()
                         .HasForeignKey("CandidatoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VotoElectronico.API.Models.Eleccion", "Eleccion")
+                    b.HasOne("VotoElectronico.API.Models.Candidato", null)
                         .WithMany("Votos")
+                        .HasForeignKey("CandidatoId1");
+
+                    b.HasOne("VotoElectronico.API.Models.Eleccion", "Eleccion")
+                        .WithMany()
                         .HasForeignKey("EleccionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("VotoElectronico.API.Models.Eleccion", null)
+                        .WithMany("Votos")
+                        .HasForeignKey("EleccionId1");
 
                     b.HasOne("VotoElectronico.API.Models.Usuario", "Usuario")
                         .WithMany()

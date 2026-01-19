@@ -2,7 +2,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using VotoElectronico.API.Data;
 using VotoElectronico.API.Data.Context;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +49,13 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<VotoElectronicoContext>();
+    DbInitializercs.Seed(context);
+}
+
 app.Run();
 
 

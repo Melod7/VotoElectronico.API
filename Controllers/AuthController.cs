@@ -1,48 +1,47 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using VotoElectronico.API.Data.Context;
-using VotoElectronico.API.DTOs;
+using VotoElectronico.API.DTOs.Auth;
 using VotoElectronico.API.Models;
+using VotoElectronico.API.Utils;
 
-namespace VotoElectronico.API.Controllers
+namespace VotoElectronico.API.Controllers;
+
+[ApiController]
+[Route("api/auth")]
+public class AuthController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    private readonly VotoElectronicoContext _context;
+
+    public AuthController(VotoElectronicoContext context)
     {
-        private readonly VotoElectronicoContext _context;
+        _context = context;
+    }
 
-        public AuthController(VotoElectronicoContext context)
-        {
-            _context = context;
-        }
+    // JUEZ DE MESA
+    [HttpPost("habilitar-voto")]
+    public IActionResult HabilitarVoto(SolicitarCodigoDTO dto)
+    {
+        var usuario = _context.Usuarios
+            .FirstOrDefault(u => u.Cedula == dto.Cedula && u.Habilitado);
 
-        // POST: api/auth/login
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
-        {
-            if (loginDTO == null)
-                return BadRequest("Datos de login inválidos");
+        if (usuario == null)
+            return NotFound("La persona no está en el padrón electoral");
 
-            var usuario = await _context.Usuarios
-                .Include(u => u.Rol)
-                .FirstOrDefaultAsync(u =>
-                    u.Correo == loginDTO.Correo &&
-                    u.Clave == loginDTO.Contraseña
-                );
+        if (usuario.YaVoto)
+            return BadRequest("El votante ya ejerció su derecho al voto");
 
-            if (usuario == null)
-                return Unauthorized("Credenciales incorrectas");
+        // Código alfanumérico de 6
+        var codigo = CodigoHelper.GenerarCodigo();
 
-            // Respuesta simple (sin exponer la clave)
-            return Ok(new
-            {
-                usuario.Id,
-                usuario.Nombre,
-                usuario.Correo,
-                Rol = usuario.Rol.Nombre
-            });
-        }
+        usuario.CodigoVerificacion = codigo;
+        usuario.CodigoExpira = DateTime.Now.AddMinutes(10);
+
+        _context.SaveChanges();
+
+        // Simulación de envío
+        Console.WriteLine($" Email a {usuario.Correo}: Código {codigo}");
+        Console.WriteLine($" SMS a {usuario.Telefono}: Código {codigo}");
+
+        return Ok("Votante habilitado. Código enviado.");
     }
 }
-

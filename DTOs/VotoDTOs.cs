@@ -2,7 +2,8 @@
 {
     public class VotoDTOs
     {
-        public int EleccionId { get; set; }
+        public string Cedula { get; set; }
+        public string Codigo { get; set; }
         public int CandidatoId { get; set; }
     }
 }
