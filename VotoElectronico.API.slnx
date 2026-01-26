@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="../VotoElectronico.MVC/VotoElectronico.MVC.csproj" Id="68beb581-ca29-425f-876a-74a4a96ca9ce" />
   <Project Path="VotoElectronico.API.csproj" />
 </Solution>
